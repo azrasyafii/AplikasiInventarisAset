@@ -67,8 +67,6 @@ public class InventarisApp extends javax.swing.JFrame {
         jLabel12 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tableInventaris = new javax.swing.JTable();
-        jLabel14 = new javax.swing.JLabel();
-        txtTanggal = new javax.swing.JTextField();
         cmbLaporan = new javax.swing.JComboBox<>();
 
         jLabel1.setText("jLabel1");
@@ -222,15 +220,6 @@ public class InventarisApp extends javax.swing.JFrame {
         tableInventaris.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jScrollPane1.setViewportView(tableInventaris);
 
-        jLabel14.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel14.setText("TANGGAL");
-
-        txtTanggal.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtTanggalActionPerformed(evt);
-            }
-        });
-
         cmbLaporan.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "LAPORAN STOK BARANG", "LAPORAN BARANG MASUK", "LAPORAN BARANG KELUAR" }));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -252,61 +241,61 @@ public class InventarisApp extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(189, 189, 189)
-                        .addComponent(jLabel9)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addContainerGap(52, Short.MAX_VALUE)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jLabel10)
-                                .addGap(8, 8, 8)
-                                .addComponent(cmbKategori, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGap(2, 2, 2)
+                                .addGap(189, 189, 189)
+                                .addComponent(jLabel9)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(jPanel2Layout.createSequentialGroup()
-                                        .addGap(2, 2, 2)
                                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLabel4)
                                             .addGroup(jPanel2Layout.createSequentialGroup()
-                                                .addGap(17, 17, 17)
-                                                .addComponent(btnTambah))
-                                            .addComponent(jLabel5)
-                                            .addComponent(jLabel6))
-                                        .addGap(39, 39, 39))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLabel14)
-                                            .addComponent(jLabel3))
-                                        .addGap(65, 65, 65)))
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(txtIdBarang)
-                                    .addComponent(txtStok)
-                                    .addComponent(txtKondisi)
-                                    .addComponent(txtNamaBarang, javax.swing.GroupLayout.DEFAULT_SIZE, 338, Short.MAX_VALUE)
+                                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(jLabel4)
+                                                    .addGroup(jPanel2Layout.createSequentialGroup()
+                                                        .addGap(17, 17, 17)
+                                                        .addComponent(btnTambah))
+                                                    .addComponent(jLabel5)
+                                                    .addComponent(jLabel6))
+                                                .addGap(39, 39, 39))
+                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                                                .addComponent(jLabel3)
+                                                .addGap(65, 65, 65)))
+                                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addComponent(txtIdBarang)
+                                            .addComponent(txtStok)
+                                            .addComponent(txtKondisi)
+                                            .addComponent(txtNamaBarang, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                                .addComponent(btnUbah, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(44, 44, 44)
+                                                .addComponent(btnHapus)
+                                                .addGap(48, 48, 48)
+                                                .addComponent(btnKeluar))))
                                     .addGroup(jPanel2Layout.createSequentialGroup()
-                                        .addComponent(btnUbah, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(44, 44, 44)
-                                        .addComponent(btnHapus)
-                                        .addGap(48, 48, 48)
-                                        .addComponent(btnKeluar))
-                                    .addComponent(txtTanggal))))))
-                .addGap(60, 60, 60)
+                                        .addComponent(jLabel10)
+                                        .addGap(8, 8, 8)
+                                        .addComponent(cmbKategori, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(2, 2, 2)))
+                        .addGap(60, 60, 60))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addGap(0, 33, Short.MAX_VALUE)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 514, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(54, 54, 54)))
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 532, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(21, 21, 21))
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
-                        .addGap(155, 155, 155)
+                        .addGap(167, 167, 167)
                         .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 236, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(142, 142, 142))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 514, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(75, 75, 75)
+                        .addGap(601, 601, 601)
                         .addComponent(jScrollPane4)))
                 .addContainerGap())
         );
@@ -323,11 +312,7 @@ public class InventarisApp extends javax.swing.JFrame {
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel10)
                             .addComponent(cmbKategori, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(43, 43, 43)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel14)
-                            .addComponent(txtTanggal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
+                        .addGap(40, 40, 40)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel3)
                             .addComponent(txtIdBarang, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -516,10 +501,6 @@ public class InventarisApp extends javax.swing.JFrame {
     }
     }//GEN-LAST:event_btnImportActionPerformed
 
-    private void txtTanggalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTanggalActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtTanggalActionPerformed
-
     /**
      * @param args the command line arguments
      */
@@ -569,7 +550,6 @@ public class InventarisApp extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -591,6 +571,5 @@ public class InventarisApp extends javax.swing.JFrame {
     private javax.swing.JTextField txtKondisi;
     private javax.swing.JTextField txtNamaBarang;
     private javax.swing.JTextField txtStok;
-    private javax.swing.JTextField txtTanggal;
     // End of variables declaration//GEN-END:variables
 }

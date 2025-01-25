@@ -218,6 +218,11 @@ public class InventarisApp extends javax.swing.JFrame {
             }
         });
         tableInventaris.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        tableInventaris.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableInventarisMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tableInventaris);
 
         cmbLaporan.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "LAPORAN STOK BARANG", "LAPORAN BARANG MASUK", "LAPORAN BARANG KELUAR" }));
@@ -381,29 +386,103 @@ public class InventarisApp extends javax.swing.JFrame {
     }//GEN-LAST:event_btnKeluarActionPerformed
 
     private void btnTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahActionPerformed
-        DefaultTableModel model = (DefaultTableModel) tableInventaris.getModel();
-    model.addRow(new Object[]{
-        txtIdBarang.getText(),
-        txtNamaBarang.getText(),
-        txtStok.getText(),
-        txtKondisi.getText()
-    });
-    txtIdBarang.setText("");
-    txtNamaBarang.setText("");
-    txtStok.setText("");
-    txtKondisi.setText("");
+     // Validasi input
+    if (!validateInput()) return;
+
+    String kategori = cmbKategori.getSelectedItem().toString();
+    DefaultTableModel stokModel = (DefaultTableModel) tableInventaris.getModel();
+
+    if (kategori.equals("BARANG MASUK")) {
+        // Tambahkan data ke tabel Barang Masuk
+        DefaultTableModel barangMasukModel = (DefaultTableModel) tableBarangMasuk.getModel();
+        barangMasukModel.addRow(new Object[]{
+            txtIdBarang.getText(),
+            txtNamaBarang.getText(),
+            txtStok.getText(),
+            txtKondisi.getText()
+        });
+
+        // Tambahkan atau update data ke tabel Stok Barang
+        boolean barangDitemukan = false;
+        for (int i = 0; i < stokModel.getRowCount(); i++) {
+            if (stokModel.getValueAt(i, 0).toString().equals(txtIdBarang.getText())) {
+                // Jika barang sudah ada, update stok
+                int stokLama = Integer.parseInt(stokModel.getValueAt(i, 2).toString());
+                int stokBaru = stokLama + Integer.parseInt(txtStok.getText());
+                stokModel.setValueAt(stokBaru, i, 2);
+                barangDitemukan = true;
+                break;
+            }
+        }
+
+        if (!barangDitemukan) {
+            // Jika barang belum ada, tambahkan sebagai barang baru
+            stokModel.addRow(new Object[]{
+                txtIdBarang.getText(),
+                txtNamaBarang.getText(),
+                txtStok.getText(),
+                txtKondisi.getText()
+            });
+        }
+
+    } else if (kategori.equals("BARANG KELUAR")) {
+        // Tambahkan data ke tabel Barang Keluar
+        DefaultTableModel barangKeluarModel = (DefaultTableModel) tableBarangKeluar.getModel();
+        barangKeluarModel.addRow(new Object[]{
+            txtIdBarang.getText(),
+            txtNamaBarang.getText(),
+            txtStok.getText(),
+            txtKondisi.getText()
+        });
+
+        // Kurangi stok di tabel Stok Barang
+        boolean barangDitemukan = false;
+        for (int i = 0; i < stokModel.getRowCount(); i++) {
+            if (stokModel.getValueAt(i, 0).toString().equals(txtIdBarang.getText())) {
+                // Jika barang ditemukan, kurangi stok
+                int stokLama = Integer.parseInt(stokModel.getValueAt(i, 2).toString());
+                int stokBaru = stokLama - Integer.parseInt(txtStok.getText());
+                if (stokBaru < 0) {
+                    JOptionPane.showMessageDialog(this, "Stok tidak mencukupi untuk barang keluar!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                stokModel.setValueAt(stokBaru, i, 2);
+                barangDitemukan = true;
+                break;
+            }
+        }
+
+        if (!barangDitemukan) {
+            JOptionPane.showMessageDialog(this, "Barang tidak ditemukan di tabel stok!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    }
+
+    // Bersihkan form
+    clearFields();
+    JOptionPane.showMessageDialog(this, "Data berhasil ditambahkan!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_btnTambahActionPerformed
 
     private void btnUbahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUbahActionPerformed
-         int selectedRow = tableInventaris.getSelectedRow();
+    // Validasi input
+    if (!validateInput()) return;
+
+    // Ambil baris yang dipilih
+    int selectedRow = tableInventaris.getSelectedRow();
     if (selectedRow >= 0) {
         DefaultTableModel model = (DefaultTableModel) tableInventaris.getModel();
-        model.setValueAt(txtIdBarang.getText(), selectedRow, 0);
-        model.setValueAt(txtNamaBarang.getText(), selectedRow, 1);
-        model.setValueAt(txtStok.getText(), selectedRow, 2);
-        model.setValueAt(txtKondisi.getText(), selectedRow, 3);
+        
+        // Update data pada baris yang dipilih
+        model.setValueAt(txtIdBarang.getText(), selectedRow, 0);  // ID Barang
+        model.setValueAt(txtNamaBarang.getText(), selectedRow, 1);  // Nama Barang
+        model.setValueAt(txtStok.getText(), selectedRow, 2);  // Stok Barang
+        model.setValueAt(txtKondisi.getText(), selectedRow, 3);  // Kondisi Barang
+        
+        // Bersihkan form setelah proses selesai
+        clearFields();
+        JOptionPane.showMessageDialog(this, "Data berhasil diubah!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
     } else {
-        JOptionPane.showMessageDialog(this, "Pilih baris yang ingin diubah.");
+        JOptionPane.showMessageDialog(this, "Pilih baris yang ingin diubah.", "Peringatan", JOptionPane.WARNING_MESSAGE);
     }
     }//GEN-LAST:event_btnUbahActionPerformed
 
@@ -418,49 +497,66 @@ public class InventarisApp extends javax.swing.JFrame {
     }//GEN-LAST:event_btnHapusActionPerformed
 
     private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
-        // Membuka jendela pemilihan lokasi untuk menyimpan file PDF
+   String laporanDipilih = cmbLaporan.getSelectedItem().toString(); // Mendapatkan pilihan laporan
+    DefaultTableModel model;
+    String judulLaporan;
+
+    switch (laporanDipilih) {
+        case "LAPORAN STOK BARANG":
+            model = (DefaultTableModel) tableInventaris.getModel();
+            judulLaporan = "LAPORAN STOK BARANG";
+            break;
+        case "LAPORAN BARANG MASUK":
+            model = (DefaultTableModel) tableBarangMasuk.getModel();
+            judulLaporan = "LAPORAN BARANG MASUK";
+            break;
+        case "LAPORAN BARANG KELUAR":
+            model = (DefaultTableModel) tableBarangKeluar.getModel();
+            judulLaporan = "LAPORAN BARANG KELUAR";
+            break;
+        default:
+            JOptionPane.showMessageDialog(this, "Pilih jenis laporan yang valid!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+    }
+
     JFileChooser fileChooser = new JFileChooser();
     fileChooser.setDialogTitle("Pilih Lokasi untuk Menyimpan File");
     fileChooser.addChoosableFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF File (*.pdf)", "pdf"));
 
     int userSelection = fileChooser.showSaveDialog(this);
     if (userSelection == JFileChooser.APPROVE_OPTION) {
-        // Mendapatkan file yang dipilih pengguna
         File fileToSave = fileChooser.getSelectedFile();
         try {
             // Membuat dokumen PDF baru
             Document document = new Document();
-            // Membuat writer untuk menulis dokumen ke file
             PdfWriter.getInstance(document, new FileOutputStream(fileToSave + ".pdf"));
 
             // Membuka dokumen untuk ditulis
             document.open();
 
-            // Menambahkan judul
+            // Menambahkan judul laporan
             Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
-            Paragraph title = new Paragraph("Inventaris Barang", titleFont);
+            Paragraph title = new Paragraph(judulLaporan, titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
             document.add(title);
 
             // Menambahkan jarak
             document.add(new Paragraph("\n"));
 
-            // Membuat tabel dengan 4 kolom (ID Barang, Nama Barang, Stok Barang, Kondisi)
-            PdfPTable table = new PdfPTable(4);
+            // Menentukan jumlah kolom sesuai tabel yang dipilih
+            int columnCount = model.getColumnCount();
+            PdfPTable table = new PdfPTable(columnCount);
 
             // Menambahkan header tabel
-            table.addCell("ID BARANG");
-            table.addCell("NAMA BARANG");
-            table.addCell("STOK BARANG");
-            table.addCell("KONDISI");
+            for (int i = 0; i < columnCount; i++) {
+                table.addCell(model.getColumnName(i));
+            }
 
-            // Mengisi tabel dengan data dari JTable
-            DefaultTableModel model = (DefaultTableModel) tableInventaris.getModel();
+            // Menambahkan data ke tabel
             for (int i = 0; i < model.getRowCount(); i++) {
-                table.addCell(model.getValueAt(i, 0).toString());  // ID Barang
-                table.addCell(model.getValueAt(i, 1).toString());  // Nama Barang
-                table.addCell(model.getValueAt(i, 2).toString());  // Stok Barang
-                table.addCell(model.getValueAt(i, 3).toString());  // Kondisi Barang
+                for (int j = 0; j < columnCount; j++) {
+                    table.addCell(model.getValueAt(i, j).toString());
+                }
             }
 
             // Menambahkan tabel ke dalam dokumen PDF
@@ -469,17 +565,15 @@ public class InventarisApp extends javax.swing.JFrame {
             // Menutup dokumen
             document.close();
 
-            // Menampilkan pesan sukses
-            JOptionPane.showMessageDialog(this, "Data berhasil diekspor ke PDF!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Laporan berhasil diekspor ke PDF!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
         } catch (DocumentException | IOException ex) {
-            // Menampilkan pesan error jika terjadi masalah saat membuat PDF
             JOptionPane.showMessageDialog(this, "Gagal membuat file PDF: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     }//GEN-LAST:event_btnExportActionPerformed
 
     private void btnImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImportActionPerformed
-         JFileChooser fileChooser = new JFileChooser();
+    JFileChooser fileChooser = new JFileChooser();
     fileChooser.setDialogTitle("Pilih File untuk Diimpor");
     fileChooser.addChoosableFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSV File (*.csv)", "csv"));
 
@@ -488,11 +582,16 @@ public class InventarisApp extends javax.swing.JFrame {
         File selectedFile = fileChooser.getSelectedFile();
         try (BufferedReader reader = new BufferedReader(new FileReader(selectedFile))) {
             DefaultTableModel model = (DefaultTableModel) tableInventaris.getModel();
-            model.setRowCount(0); // Hapus semua baris
+            model.setRowCount(0); // Clear existing rows
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] rowData = line.split(",");
-                model.addRow(rowData);
+                if (rowData.length == 4) { // Ensure the CSV has 4 columns
+                    model.addRow(rowData);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Format data tidak valid di file CSV.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
             }
             JOptionPane.showMessageDialog(this, "Data berhasil diimpor!");
         } catch (IOException e) {
@@ -501,6 +600,44 @@ public class InventarisApp extends javax.swing.JFrame {
     }
     }//GEN-LAST:event_btnImportActionPerformed
 
+    private void tableInventarisMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableInventarisMouseClicked
+         int selectedRow = tableInventaris.getSelectedRow();
+    if (selectedRow >= 0) {
+        DefaultTableModel model = (DefaultTableModel) tableInventaris.getModel();
+        txtIdBarang.setText(model.getValueAt(selectedRow, 0).toString());
+        txtNamaBarang.setText(model.getValueAt(selectedRow, 1).toString());
+        txtStok.setText(model.getValueAt(selectedRow, 2).toString());
+        txtKondisi.setText(model.getValueAt(selectedRow, 3).toString());
+    }
+    }//GEN-LAST:event_tableInventarisMouseClicked
+
+
+   private void clearFields() {
+    txtIdBarang.setText("");
+    txtNamaBarang.setText("");
+    txtStok.setText("");
+    txtKondisi.setText("");
+    }
+
+   
+   private boolean validateInput() {
+    if (txtIdBarang.getText().isEmpty() ||
+        txtNamaBarang.getText().isEmpty() ||
+        txtStok.getText().isEmpty() ||
+        txtKondisi.getText().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Semua field harus diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        return false;
+    }
+    try {
+        Integer.parseInt(txtStok.getText()); // Pastikan stok adalah angka
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Stok harus berupa angka!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        return false;
+    }
+    return true;
+   }
+    
+    
     /**
      * @param args the command line arguments
      */

@@ -1,17 +1,17 @@
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.FileWriter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.*;
 import java.io.*;
-import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.List;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.swing.JOptionPane;
 
 
@@ -23,6 +23,7 @@ public class InventarisApp extends javax.swing.JFrame {
      */
     public InventarisApp() {
         initComponents();
+        loadTableData(); // Panggil metode untuk memuat data dari database
     }
 
     /**
@@ -386,81 +387,68 @@ public class InventarisApp extends javax.swing.JFrame {
     }//GEN-LAST:event_btnKeluarActionPerformed
 
     private void btnTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahActionPerformed
-     // Validasi input
     if (!validateInput()) return;
 
     String kategori = cmbKategori.getSelectedItem().toString();
-    DefaultTableModel stokModel = (DefaultTableModel) tableInventaris.getModel();
+    String idBarang = txtIdBarang.getText();
+    String namaBarang = txtNamaBarang.getText();
+    int stok = Integer.parseInt(txtStok.getText());
+    String kondisi = txtKondisi.getText();
 
-    if (kategori.equals("BARANG MASUK")) {
-        // Tambahkan data ke tabel Barang Masuk
-        DefaultTableModel barangMasukModel = (DefaultTableModel) tableBarangMasuk.getModel();
-        barangMasukModel.addRow(new Object[]{
-            txtIdBarang.getText(),
-            txtNamaBarang.getText(),
-            txtStok.getText(),
-            txtKondisi.getText()
-        });
-
-        // Tambahkan atau update data ke tabel Stok Barang
-        boolean barangDitemukan = false;
-        for (int i = 0; i < stokModel.getRowCount(); i++) {
-            if (stokModel.getValueAt(i, 0).toString().equals(txtIdBarang.getText())) {
-                // Jika barang sudah ada, update stok
-                int stokLama = Integer.parseInt(stokModel.getValueAt(i, 2).toString());
-                int stokBaru = stokLama + Integer.parseInt(txtStok.getText());
-                stokModel.setValueAt(stokBaru, i, 2);
-                barangDitemukan = true;
-                break;
+    try (Connection conn = DatabaseConnection.getConnection()) {
+        if (kategori.equals("BARANG MASUK")) {
+            // Insert ke tabel barang_masuk
+            String sqlMasuk = "INSERT INTO barang_masuk (id_barang, nama_barang, stok, kondisi) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement psMasuk = conn.prepareStatement(sqlMasuk)) {
+                psMasuk.setString(1, idBarang);
+                psMasuk.setString(2, namaBarang);
+                psMasuk.setInt(3, stok);
+                psMasuk.setString(4, kondisi);
+                psMasuk.executeUpdate();
             }
-        }
 
-        if (!barangDitemukan) {
-            // Jika barang belum ada, tambahkan sebagai barang baru
-            stokModel.addRow(new Object[]{
-                txtIdBarang.getText(),
-                txtNamaBarang.getText(),
-                txtStok.getText(),
-                txtKondisi.getText()
-            });
-        }
+            // Update tabel stok_barang
+            String sqlStok = "INSERT INTO stok_barang (id_barang, nama_barang, stok, kondisi) VALUES (?, ?, ?, ?) " +
+                             "ON DUPLICATE KEY UPDATE stok = stok + ?";
+            try (PreparedStatement psStok = conn.prepareStatement(sqlStok)) {
+                psStok.setString(1, idBarang);
+                psStok.setString(2, namaBarang);
+                psStok.setInt(3, stok);
+                psStok.setString(4, kondisi);
+                psStok.setInt(5, stok);
+                psStok.executeUpdate();
+            }
+        } else if (kategori.equals("BARANG KELUAR")) {
+            // Insert ke tabel barang_keluar
+            String sqlKeluar = "INSERT INTO barang_keluar (id_barang, nama_barang, stok, kondisi) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement psKeluar = conn.prepareStatement(sqlKeluar)) {
+                psKeluar.setString(1, idBarang);
+                psKeluar.setString(2, namaBarang);
+                psKeluar.setInt(3, stok);
+                psKeluar.setString(4, kondisi);
+                psKeluar.executeUpdate();
+            }
 
-    } else if (kategori.equals("BARANG KELUAR")) {
-        // Tambahkan data ke tabel Barang Keluar
-        DefaultTableModel barangKeluarModel = (DefaultTableModel) tableBarangKeluar.getModel();
-        barangKeluarModel.addRow(new Object[]{
-            txtIdBarang.getText(),
-            txtNamaBarang.getText(),
-            txtStok.getText(),
-            txtKondisi.getText()
-        });
-
-        // Kurangi stok di tabel Stok Barang
-        boolean barangDitemukan = false;
-        for (int i = 0; i < stokModel.getRowCount(); i++) {
-            if (stokModel.getValueAt(i, 0).toString().equals(txtIdBarang.getText())) {
-                // Jika barang ditemukan, kurangi stok
-                int stokLama = Integer.parseInt(stokModel.getValueAt(i, 2).toString());
-                int stokBaru = stokLama - Integer.parseInt(txtStok.getText());
-                if (stokBaru < 0) {
-                    JOptionPane.showMessageDialog(this, "Stok tidak mencukupi untuk barang keluar!", "Error", JOptionPane.ERROR_MESSAGE);
+            // Update tabel stok_barang
+            String sqlStok = "UPDATE stok_barang SET stok = stok - ? WHERE id_barang = ?";
+            try (PreparedStatement psStok = conn.prepareStatement(sqlStok)) {
+                psStok.setInt(1, stok);
+                psStok.setString(2, idBarang);
+                int rowsAffected = psStok.executeUpdate();
+                if (rowsAffected == 0) {
+                    JOptionPane.showMessageDialog(this, "Barang tidak ditemukan di stok!", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                stokModel.setValueAt(stokBaru, i, 2);
-                barangDitemukan = true;
-                break;
             }
         }
 
-        if (!barangDitemukan) {
-            JOptionPane.showMessageDialog(this, "Barang tidak ditemukan di tabel stok!", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        JOptionPane.showMessageDialog(this, "Data berhasil ditambahkan!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+        loadTableData(); // Panggil untuk memperbarui tabel
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Error saat menyimpan data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    // Bersihkan form
     clearFields();
-    JOptionPane.showMessageDialog(this, "Data berhasil ditambahkan!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_btnTambahActionPerformed
 
     private void btnUbahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUbahActionPerformed
@@ -481,16 +469,31 @@ public class InventarisApp extends javax.swing.JFrame {
         // Bersihkan form setelah proses selesai
         clearFields();
         JOptionPane.showMessageDialog(this, "Data berhasil diubah!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+        loadTableData(); // Panggil untuk memperbarui tabel
     } else {
         JOptionPane.showMessageDialog(this, "Pilih baris yang ingin diubah.", "Peringatan", JOptionPane.WARNING_MESSAGE);
     }
     }//GEN-LAST:event_btnUbahActionPerformed
 
     private void btnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHapusActionPerformed
-        int selectedRow = tableInventaris.getSelectedRow();
+   int selectedRow = tableInventaris.getSelectedRow();
     if (selectedRow >= 0) {
-        DefaultTableModel model = (DefaultTableModel) tableInventaris.getModel();
-        model.removeRow(selectedRow);
+        String idBarang = tableInventaris.getValueAt(selectedRow, 0).toString();
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String sqlDelete = "DELETE FROM stok_barang WHERE id_barang = ?";
+            try (PreparedStatement psDelete = conn.prepareStatement(sqlDelete)) {
+                psDelete.setString(1, idBarang);
+                psDelete.executeUpdate();
+            }
+
+            DefaultTableModel model = (DefaultTableModel) tableInventaris.getModel();
+            model.removeRow(selectedRow);
+            JOptionPane.showMessageDialog(this, "Data berhasil dihapus!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+            loadTableData(); // Panggil untuk memperbarui tabel
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error saat menghapus data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     } else {
         JOptionPane.showMessageDialog(this, "Pilih baris yang ingin dihapus.");
     }
@@ -637,6 +640,66 @@ public class InventarisApp extends javax.swing.JFrame {
     return true;
    }
     
+   private void loadTableData() {
+    try (Connection conn = DatabaseConnection.getConnection()) {
+        DefaultTableModel modelStok = (DefaultTableModel) tableInventaris.getModel();
+        DefaultTableModel modelMasuk = (DefaultTableModel) tableBarangMasuk.getModel();
+        DefaultTableModel modelKeluar = (DefaultTableModel) tableBarangKeluar.getModel();
+
+        // Bersihkan tabel sebelum memuat ulang
+        modelStok.setRowCount(0);
+        modelMasuk.setRowCount(0);
+        modelKeluar.setRowCount(0);
+
+        // Muat data stok_barang
+        String sqlStok = "SELECT * FROM stok_barang";
+        try (PreparedStatement psStok = conn.prepareStatement(sqlStok);
+             ResultSet rsStok = psStok.executeQuery()) {
+            while (rsStok.next()) {
+                Object[] row = {
+                    rsStok.getString("id_barang"),
+                    rsStok.getString("nama_barang"),
+                    rsStok.getInt("stok"),
+                    rsStok.getString("kondisi")
+                };
+                modelStok.addRow(row);
+            }
+        }
+
+        // Muat data barang_masuk
+        String sqlMasuk = "SELECT * FROM barang_masuk";
+        try (PreparedStatement psMasuk = conn.prepareStatement(sqlMasuk);
+             ResultSet rsMasuk = psMasuk.executeQuery()) {
+            while (rsMasuk.next()) {
+                Object[] row = {
+                    rsMasuk.getString("id_barang"),
+                    rsMasuk.getString("nama_barang"),
+                    rsMasuk.getInt("stok"),
+                    rsMasuk.getString("kondisi")
+                };
+                modelMasuk.addRow(row);
+            }
+        }
+
+        // Muat data barang_keluar
+        String sqlKeluar = "SELECT * FROM barang_keluar";
+        try (PreparedStatement psKeluar = conn.prepareStatement(sqlKeluar);
+             ResultSet rsKeluar = psKeluar.executeQuery()) {
+            while (rsKeluar.next()) {
+                Object[] row = {
+                    rsKeluar.getString("id_barang"),
+                    rsKeluar.getString("nama_barang"),
+                    rsKeluar.getInt("stok"),
+                    rsKeluar.getString("kondisi")
+                };
+                modelKeluar.addRow(row);
+            }
+        }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Error saat memuat data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    }
+
     
     /**
      * @param args the command line arguments

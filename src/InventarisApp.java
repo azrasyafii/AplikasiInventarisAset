@@ -387,7 +387,7 @@ public class InventarisApp extends javax.swing.JFrame {
     }//GEN-LAST:event_btnKeluarActionPerformed
 
     private void btnTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahActionPerformed
-    if (!validateInput()) return;
+        if (!validateInput()) return;
 
     String kategori = cmbKategori.getSelectedItem().toString();
     String idBarang = txtIdBarang.getText();
@@ -407,15 +407,15 @@ public class InventarisApp extends javax.swing.JFrame {
                 psMasuk.executeUpdate();
             }
 
-            // Update tabel stok_barang
-            String sqlStok = "INSERT INTO stok_barang (id_barang, nama_barang, stok, kondisi) VALUES (?, ?, ?, ?) " +
-                             "ON DUPLICATE KEY UPDATE stok = stok + ?";
+            // Insert atau update stok_barang
+            String sqlStok = "INSERT INTO stok_barang (id_barang, nama_barang, stok, kondisi) " +
+                             "VALUES (?, ?, ?, ?) " +
+                             "ON DUPLICATE KEY UPDATE stok = stok + VALUES(stok)";
             try (PreparedStatement psStok = conn.prepareStatement(sqlStok)) {
                 psStok.setString(1, idBarang);
                 psStok.setString(2, namaBarang);
                 psStok.setInt(3, stok);
                 psStok.setString(4, kondisi);
-                psStok.setInt(5, stok);
                 psStok.executeUpdate();
             }
         } else if (kategori.equals("BARANG KELUAR")) {
@@ -429,12 +429,12 @@ public class InventarisApp extends javax.swing.JFrame {
                 psKeluar.executeUpdate();
             }
 
-            // Update tabel stok_barang
-            String sqlStok = "UPDATE stok_barang SET stok = stok - ? WHERE id_barang = ?";
-            try (PreparedStatement psStok = conn.prepareStatement(sqlStok)) {
-                psStok.setInt(1, stok);
-                psStok.setString(2, idBarang);
-                int rowsAffected = psStok.executeUpdate();
+            // Update stok_barang untuk mengurangi stok
+            String sqlUpdateStok = "UPDATE stok_barang SET stok = stok - ? WHERE id_barang = ?";
+            try (PreparedStatement psUpdateStok = conn.prepareStatement(sqlUpdateStok)) {
+                psUpdateStok.setInt(1, stok);
+                psUpdateStok.setString(2, idBarang);
+                int rowsAffected = psUpdateStok.executeUpdate();
                 if (rowsAffected == 0) {
                     JOptionPane.showMessageDialog(this, "Barang tidak ditemukan di stok!", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
@@ -449,6 +449,7 @@ public class InventarisApp extends javax.swing.JFrame {
     }
 
     clearFields();
+
     }//GEN-LAST:event_btnTambahActionPerformed
 
     private void btnUbahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUbahActionPerformed
